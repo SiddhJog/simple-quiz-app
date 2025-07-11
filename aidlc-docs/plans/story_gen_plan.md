@@ -97,34 +97,34 @@ Analyze requirements document and create comprehensive user personas, user stori
 **Critical decisions that need stakeholder input:**
 
 1. **User Personas Depth:**
-   - How detailed should the user personas be? (basic demographics vs comprehensive profiles)
-   - Should we include specific user scenarios and use cases?
-   - Any specific target demographics to focus on for general public users?
+   - How detailed should the user personas be? (basic demographics vs comprehensive profiles) [Answer]: basic demographics. 
+   - Should we include specific user scenarios and use cases?  [Answer]: no
+   - Any specific target demographics to focus on for general public users?  [Answer]: no
 
 2. **Story Granularity:**
-   - What level of detail is preferred for user stories? (high-level epics vs detailed tasks)
-   - Should technical stories be included or focus only on user-facing functionality?
-   - How should non-functional requirements be represented in stories?
+   - What level of detail is preferred for user stories? (high-level epics vs detailed tasks)  [Answer]: detailed stories.
+   - Should technical stories be included or focus only on user-facing functionality?  [Answer]: yes technical too.
+   - How should non-functional requirements be represented in stories?  [Answer]: just add them as testing criteria/acceptance criteria.
 
 3. **Units of Work Scope:**
-   - What size/complexity should each unit of work target? (sprint-sized, feature-sized, etc.)
-   - Should units of work align with specific development phases or can they be mixed?
-   - Any preference for frontend vs backend separation in units of work?
+   - What size/complexity should each unit of work target? (sprint-sized, feature-sized, etc.)  [Answer]: not size based, group logically.
+   - Should units of work align with specific development phases or can they be mixed?  [Answer]: they should be independent of one another as much as possible.
+   - Any preference for frontend vs backend separation in units of work?  [Answer]: logically grouped so frontend and backend can be together.
 
 4. **Dependency Analysis Detail:**
-   - Should the dependency analysis include technical dependencies (infrastructure, third-party services)?
-   - What level of detail is needed for the dependency matrix? (high-level vs detailed task dependencies)
-   - Should we include risk assessment for critical dependencies?
+   - Should the dependency analysis include technical dependencies (infrastructure, third-party services)?  [Answer]: no.
+   - What level of detail is needed for the dependency matrix? (high-level vs detailed task dependencies)  [Answer]: both high level and detailed.
+   - Should we include risk assessment for critical dependencies?  [Answer]: no
 
 5. **Admin User Considerations:**
-   - Should admin stories be treated as separate personas or integrated with regular user flow?
-   - What level of admin functionality detail is needed beyond basic question management?
-   - Should we consider different admin roles (content admin, system admin, etc.)?
+   - Should admin stories be treated as separate personas or integrated with regular user flow?  [Answer]: separate
+   - What level of admin functionality detail is needed beyond basic question management?  [Answer]: question and topic management. 
+   - Should we consider different admin roles (content admin, system admin, etc.)?  [Answer]: no
 
 6. **Story Prioritization:**
-   - Should stories include MoSCoW prioritization (Must, Should, Could, Won't)?
-   - How should we handle dependencies when assigning priorities?
-   - Should we align story priorities with the existing requirement priorities?
+   - Should stories include MoSCoW prioritization (Must, Should, Could, Won't)?  [Answer]: yes
+   - How should we handle dependencies when assigning priorities?  [Answer]: keep dependencies logical, this should mean that priorities are assigned more or less uniformly within a UoW.
+   - Should we align story priorities with the existing requirement priorities?  [Answer]: there are no existing priorites.
 
 ## Deliverables
 1. **personas.md** - User personas and roles definition
@@ -137,6 +137,15 @@ Analyze requirements document and create comprehensive user personas, user stori
 2. **Get answers to clarification questions**
 3. **Proceed with artifact creation once approved**
 
+## Additional Minor Clarification Needed
+
+**Just 1 quick clarification:**
+
+1. **Story Prioritization Baseline:** Since there are no existing requirement priorities, should I assign MoSCoW priorities based on: 
+   - Core functionality first (Must), then enhancements (Should/Could)?
+   - User journey flow (authentication → quiz → results)?
+   - Or any other specific criteria you prefer?
+ [Answer]: base it on user journey flows.
 ---
 *Plan created: [Current Date]*
-*Status: Awaiting Review and Approval*
+*Status: Clarifications Received - Ready for Final Approval*
