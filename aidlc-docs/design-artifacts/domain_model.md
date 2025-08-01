@@ -1,377 +1,388 @@
 # Domain Model
 
 ## Overview
-This document defines the domain model for the Simple Quiz Application, including core business entities, their relationships, domain services, and business rules.
+This document defines the core business entities, their attributes, relationships, and business rules for the quiz application domain.
 
 ## Core Domain Entities
 
 ### 1. User Entity
-**Description**: Represents a user of the quiz application (both regular users and admins)
+
+**Purpose**: Represents a quiz application user identified by unique ID
 
 **Attributes**:
-- `userId`: String (Primary identifier)
-- `email`: String (Unique, used for login)
-- `passwordHash`: String (Encrypted password)
-- `role`: Enum (USER, ADMIN)
-- `createdAt`: DateTime
-- `lastLoginAt`: DateTime
-- `isActive`: Boolean
+- `user_id` (String, Primary Key): Unique alphanumeric identifier
+- `created_at` (DateTime): When user first accessed the system
+- `last_active` (DateTime): Last activity timestamp
+- `total_quizzes` (Integer): Total number of quizzes completed
+- `average_score` (Decimal): Overall average score across all quizzes
+- `average_response_time` (Decimal): Average time taken to answer questions
 
 **Business Rules**:
-- Email must be unique across all users
-- Password must meet policy: 8+ chars, 1 uppercase, 1 lowercase, 1 special character
-- Users can have multiple quiz sessions but only one active session at a time
+- User ID must be alphanumeric only
+- User ID must be unique across the system
+- User ID is required for all system access
+- No persistent authentication beyond session
+- User data persists across sessions but ID must be re-entered
+
+**Lifecycle**:
+1. **Created**: When unique user ID is first validated
+2. **Active**: During quiz sessions and dashboard access
+3. **Inactive**: When session expires or user leaves
+4. **Persistent**: User data remains in system indefinitely
 
 ### 2. Topic Entity
-**Description**: Represents quiz topics/categories
+
+**Purpose**: Represents quiz subject categories
 
 **Attributes**:
-- `topicId`: String (Primary identifier)
-- `name`: String (Topic name)
-- `description`: String
-- `isActive`: Boolean
-- `questionCount`: Integer (Derived)
-- `createdAt`: DateTime
-- `updatedAt`: DateTime
+- `topic_id` (Integer, Primary Key): Unique topic identifier
+- `topic_name` (String): Display name (General Knowledge, Science, Films)
+- `description` (String): Topic description
+- `question_count` (Integer): Number of questions available
+- `created_at` (DateTime): Topic creation timestamp
 
 **Business Rules**:
-- Topic names are fixed: General Knowledge, Physics, Chemistry, Bollywood Movies, Hollywood Movies
-- Topics cannot be deleted, only deactivated
-- Must have at least 10 questions to be available for quizzes
+- Each topic must have at least 100 questions
+- Topic names are predefined and managed by administrators
+- Topics cannot be deleted if questions exist
+- All topics are available to all users
+
+**Lifecycle**:
+1. **Created**: During initial system setup
+2. **Active**: Available for quiz selection
+3. **Maintained**: Questions added/updated by administrators
 
 ### 3. Question Entity
-**Description**: Represents individual quiz questions
+
+**Purpose**: Represents individual quiz questions with multiple choice answers
 
 **Attributes**:
-- `questionId`: String (Primary identifier)
-- `topicId`: String (Foreign key to Topic)
-- `questionText`: String
-- `options`: Array[String] (Exactly 4 options)
-- `correctAnswerIndex`: Integer (0-3)
-- `imageUrl`: String (Optional, S3 URL)
-- `difficulty`: Enum (EASY, MEDIUM, HARD) - Future use
-- `isActive`: Boolean
-- `createdAt`: DateTime
-- `updatedAt`: DateTime
-- `createdBy`: String (Admin userId)
+- `question_id` (Integer, Primary Key): Unique question identifier
+- `topic_id` (Integer, Foreign Key): Reference to topic
+- `question_text` (String): The question content
+- `option_a` (String): First answer choice
+- `option_b` (String): Second answer choice
+- `option_c` (String): Third answer choice
+- `option_d` (String): Fourth answer choice
+- `correct_answer` (Enum: A|B|C|D): Correct answer identifier
+- `created_at` (DateTime): Question creation timestamp
 
 **Business Rules**:
-- Must have exactly 4 answer options
-- Correct answer index must be between 0-3
-- Question text is required and non-empty
-- Images are optional, max 1MB, JPG/PNG only
-- Questions can be soft-deleted (isActive = false)
+- Each question must have exactly 4 answer options
+- Each question must have exactly 1 correct answer
+- Questions are text-based only (no multimedia in Phase 1)
+- All questions within a topic have equal difficulty
+- Questions must be associated with a valid topic
 
-### 4. Quiz Entity
-**Description**: Represents a quiz session instance
+**Lifecycle**:
+1. **Created**: During question bank setup
+2. **Active**: Available for random selection
+3. **Maintained**: Can be updated by administrators
+
+### 4. Quiz Session Entity
+
+**Purpose**: Represents an active or completed quiz session
 
 **Attributes**:
-- `quizId`: String (Primary identifier)
-- `userId`: String (Foreign key to User)
-- `topicId`: String (Foreign key to Topic)
-- `questions`: Array[QuizQuestion] (10 questions)
-- `status`: Enum (IN_PROGRESS, COMPLETED, ABANDONED)
-- `startedAt`: DateTime
-- `completedAt`: DateTime
-- `timeLimit`: Integer (15 seconds per question)
-- `currentQuestionIndex`: Integer
+- `session_id` (String, Primary Key): Unique session identifier
+- `user_id` (String, Foreign Key): Reference to user
+- `topic_id` (Integer, Foreign Key): Reference to selected topic
+- `questions` (Array): List of selected question IDs
+- `current_question` (Integer): Current question index (0-9)
+- `answers` (Array): User's selected answers
+- `start_time` (DateTime): Quiz start timestamp
+- `status` (Enum): IN_PROGRESS | COMPLETED | ABANDONED
 
 **Business Rules**:
-- Quiz must have exactly 10 questions
-- Questions are randomly selected from topic
-- Quiz expires if not completed within reasonable time
-- Cannot restart or retake completed quizzes
-- User can have only one active quiz at a time
+- Each quiz contains exactly 10 questions
+- Questions are randomly selected from chosen topic
+- No duplicate questions within a session
+- Sessions are not persisted if browser is closed
+- Only one active session per user at a time
 
-### 5. QuizQuestion Entity
-**Description**: Represents a question within a specific quiz instance
+**Lifecycle**:
+1. **Created**: When user starts a quiz
+2. **In Progress**: During question answering
+3. **Completed**: When all 10 questions answered
+4. **Abandoned**: If session is terminated early
+5. **Destroyed**: Session data cleared after completion
+
+### 5. Quiz Result Entity
+
+**Purpose**: Represents completed quiz results and scoring
 
 **Attributes**:
-- `questionId`: String (Reference to Question)
-- `questionText`: String (Snapshot)
-- `options`: Array[String] (Snapshot of 4 options)
-- `imageUrl`: String (Optional)
-- `userAnswer`: Integer (0-3, null if not answered)
-- `answeredAt`: DateTime
-- `timeSpent`: Integer (seconds)
+- `result_id` (Integer, Primary Key): Unique result identifier
+- `user_id` (String, Foreign Key): Reference to user
+- `topic_id` (Integer, Foreign Key): Reference to topic
+- `score` (Integer): Final score (0-10)
+- `total_questions` (Integer): Always 10
+- `correct_answers` (Integer): Number of correct answers
+- `completion_time` (DateTime): When quiz was completed
+- `time_taken` (Integer): Total time in seconds
+- `average_response_time` (Decimal): Average time per question
+- `question_details` (JSON): Question IDs, user answers, correct answers
 
 **Business Rules**:
-- Stores snapshot of question data at quiz time
-- User can select only one answer (0-3)
-- Answer cannot be changed once selected
-- Auto-advances after 15 seconds if no answer
+- Score equals number of correct answers
+- Maximum score is 10 points
+- Results are stored permanently
+- Only last 5 results per user are displayed on dashboard
+- All results contribute to user statistics
 
-### 6. Score Entity
-**Description**: Represents quiz results and scoring
+**Lifecycle**:
+1. **Created**: When quiz session is completed
+2. **Stored**: Persisted in database
+3. **Aggregated**: Contributes to user statistics
+4. **Displayed**: Shown in dashboard and results page
+
+### 6. User Statistics Entity
+
+**Purpose**: Aggregated performance metrics for users
 
 **Attributes**:
-- `scoreId`: String (Primary identifier)
-- `userId`: String (Foreign key to User)
-- `quizId`: String (Foreign key to Quiz)
-- `topicId`: String (Foreign key to Topic)
-- `score`: Integer (0-10)
-- `totalQuestions`: Integer (Always 10)
-- `correctAnswers`: Integer
-- `completedAt`: DateTime
-- `timeTaken`: Integer (Total seconds)
+- `user_id` (String, Primary Key): Reference to user
+- `total_quizzes` (Integer): Total completed quizzes
+- `overall_average_score` (Decimal): Average across all quizzes
+- `overall_average_time` (Decimal): Average response time
+- `topic_statistics` (JSON): Performance breakdown by topic
+- `last_updated` (DateTime): Last statistics calculation
 
 **Business Rules**:
-- Score is calculated as number of correct answers
-- Maximum score is 10 (one point per correct answer)
-- No partial credit or negative scoring
-- Unanswered questions count as incorrect
-- Scores are immutable once saved
+- Statistics are calculated after each quiz completion
+- Averages include all historical quiz results
+- Topic statistics show performance per topic
+- Statistics are updated in real-time
 
-### 7. LeaderboardEntry Entity
-**Description**: Represents leaderboard rankings
-
-**Attributes**:
-- `entryId`: String (Primary identifier)
-- `userId`: String (Foreign key to User)
-- `topicId`: String (Foreign key to Topic)
-- `score`: Integer
-- `rank`: Integer (Calculated)
-- `userName`: String (Display name)
-- `achievedAt`: DateTime
-
-**Business Rules**:
-- Rankings are calculated based on highest scores
-- Ties are broken by earliest completion time
-- Leaderboard is eventually consistent
-- Shows top performers and user's current position
+**Lifecycle**:
+1. **Created**: After user's first quiz completion
+2. **Updated**: After each subsequent quiz
+3. **Maintained**: Continuously reflects current performance
 
 ## Entity Relationships
 
-### Relationship Diagram
-```
-User (1) -----> (0..*) Quiz
-User (1) -----> (0..*) Score
-User (1) -----> (0..*) LeaderboardEntry
+### User → Quiz Results (One-to-Many)
+- One user can have multiple quiz results
+- Each result belongs to exactly one user
+- Relationship maintained through `user_id` foreign key
 
-Topic (1) -----> (0..*) Question
-Topic (1) -----> (0..*) Quiz
-Topic (1) -----> (0..*) Score
-Topic (1) -----> (0..*) LeaderboardEntry
-
-Quiz (1) -----> (10) QuizQuestion
-Quiz (1) -----> (1) Score
-
-Question (1) -----> (0..*) QuizQuestion
-```
-
-### Detailed Relationships
-
-**User → Quiz** (One-to-Many)
-- A user can take multiple quizzes over time
-- Each quiz belongs to exactly one user
-- Cascade: User deletion should handle quiz cleanup
-
-**User → Score** (One-to-Many)
-- A user can have multiple scores (quiz history)
-- Each score belongs to exactly one user
-- Cascade: Preserve scores for analytics even if user deleted
-
-**Topic → Question** (One-to-Many)
-- A topic contains multiple questions
+### Topic → Questions (One-to-Many)
+- One topic contains many questions (minimum 100)
 - Each question belongs to exactly one topic
-- Cascade: Topic deactivation affects question availability
+- Relationship maintained through `topic_id` foreign key
 
-**Quiz → QuizQuestion** (One-to-Many, Fixed 10)
-- Each quiz contains exactly 10 quiz questions
-- Quiz questions are snapshots of original questions
-- Cascade: Quiz deletion removes quiz questions
+### Topic → Quiz Results (One-to-Many)
+- One topic can be used in multiple quiz results
+- Each result is for exactly one topic
+- Relationship maintained through `topic_id` foreign key
 
-**Quiz → Score** (One-to-One)
-- Each completed quiz has exactly one score
-- Score is created when quiz is completed
-- Cascade: Quiz deletion removes associated score
+### User → User Statistics (One-to-One)
+- Each user has exactly one statistics record
+- Statistics record belongs to exactly one user
+- Relationship maintained through `user_id` primary/foreign key
 
-## Domain Services
+### Quiz Session → Questions (Many-to-Many)
+- One session contains multiple questions (exactly 10)
+- One question can appear in multiple sessions
+- Relationship maintained through question ID array in session
 
-### 1. AuthenticationService
-**Responsibilities**:
-- User registration and validation
-- Password hashing and verification
-- JWT token generation and validation
-- Session management
+## Domain Model Diagram
 
-**Key Operations**:
-```
-registerUser(email, password) -> User
-authenticateUser(email, password) -> AuthToken
-validateToken(token) -> User
-hashPassword(password) -> String
-```
-
-**Domain Events**:
-- UserRegistered
-- UserAuthenticated
-- UserLoggedOut
-
-### 2. QuizService
-**Responsibilities**:
-- Quiz initialization and management
-- Question selection and randomization
-- Quiz progression and timing
-- Answer submission and validation
-
-**Key Operations**:
-```
-initializeQuiz(userId, topicId) -> Quiz
-getNextQuestion(quizId) -> QuizQuestion
-submitAnswer(quizId, questionIndex, answer) -> Boolean
-completeQuiz(quizId) -> Score
-```
-
-**Domain Events**:
-- QuizStarted
-- QuestionAnswered
-- QuizCompleted
-- QuizAbandoned
-
-### 3. ScoringService
-**Responsibilities**:
-- Score calculation and validation
-- Score persistence and history
-- Leaderboard updates
-
-**Key Operations**:
-```
-calculateScore(quiz) -> Score
-saveScore(score) -> Boolean
-getUserScoreHistory(userId) -> List[Score]
-updateLeaderboard(score) -> Boolean
-```
-
-**Domain Events**:
-- ScoreCalculated
-- ScoreSaved
-- LeaderboardUpdated
-
-### 4. QuestionManagementService
-**Responsibilities**:
-- Question CRUD operations
-- Image upload and management
-- Topic management
-- Content validation
-
-**Key Operations**:
-```
-createQuestion(questionData) -> Question
-updateQuestion(questionId, questionData) -> Question
-deleteQuestion(questionId) -> Boolean
-uploadQuestionImage(questionId, imageData) -> String
-getQuestionsByTopic(topicId) -> List[Question]
-```
-
-**Domain Events**:
-- QuestionCreated
-- QuestionUpdated
-- QuestionDeleted
-- QuestionImageUploaded
-
-### 5. LeaderboardService
-**Responsibilities**:
-- Leaderboard calculation and ranking
-- Real-time leaderboard updates
-- User ranking retrieval
-
-**Key Operations**:
-```
-calculateRankings(topicId) -> List[LeaderboardEntry]
-getUserRanking(userId, topicId) -> LeaderboardEntry
-getTopPerformers(topicId, limit) -> List[LeaderboardEntry]
-updateUserRanking(userId, score) -> LeaderboardEntry
+```mermaid
+erDiagram
+    USER {
+        string user_id PK
+        datetime created_at
+        datetime last_active
+        int total_quizzes
+        decimal average_score
+        decimal average_response_time
+    }
+    
+    TOPIC {
+        int topic_id PK
+        string topic_name
+        string description
+        int question_count
+        datetime created_at
+    }
+    
+    QUESTION {
+        int question_id PK
+        int topic_id FK
+        string question_text
+        string option_a
+        string option_b
+        string option_c
+        string option_d
+        enum correct_answer
+        datetime created_at
+    }
+    
+    QUIZ_SESSION {
+        string session_id PK
+        string user_id FK
+        int topic_id FK
+        array questions
+        int current_question
+        array answers
+        datetime start_time
+        enum status
+    }
+    
+    QUIZ_RESULT {
+        int result_id PK
+        string user_id FK
+        int topic_id FK
+        int score
+        int total_questions
+        int correct_answers
+        datetime completion_time
+        int time_taken
+        decimal average_response_time
+        json question_details
+    }
+    
+    USER_STATISTICS {
+        string user_id PK
+        int total_quizzes
+        decimal overall_average_score
+        decimal overall_average_time
+        json topic_statistics
+        datetime last_updated
+    }
+    
+    USER ||--o{ QUIZ_RESULT : "has many"
+    USER ||--|| USER_STATISTICS : "has one"
+    TOPIC ||--o{ QUESTION : "contains"
+    TOPIC ||--o{ QUIZ_RESULT : "used in"
+    TOPIC ||--o{ QUIZ_SESSION : "selected for"
+    USER ||--o{ QUIZ_SESSION : "creates"
 ```
 
-**Domain Events**:
-- LeaderboardCalculated
-- UserRankingUpdated
+### Entity Lifecycle Diagram
 
-## Business Rules & Constraints
+```mermaid
+stateDiagram-v2
+    [*] --> UserCreated : Enter unique ID
+    UserCreated --> UserActive : Session started
+    UserActive --> UserInactive : Session ended
+    UserInactive --> UserActive : Return with ID
+    
+    [*] --> SessionCreated : Start quiz
+    SessionCreated --> SessionInProgress : First question
+    SessionInProgress --> SessionInProgress : Answer question
+    SessionInProgress --> SessionCompleted : Final answer
+    SessionInProgress --> SessionAbandoned : Browser closed
+    SessionCompleted --> [*] : Results saved
+    SessionAbandoned --> [*] : Session lost
+    
+    [*] --> QuestionCreated : Admin script
+    QuestionCreated --> QuestionActive : Available for selection
+    QuestionActive --> QuestionActive : Used in quizzes
+```
+
+## Business Rules and Constraints
+
+### User Management Rules
+1. User IDs must be unique across the entire system
+2. User IDs must contain only alphanumeric characters
+3. Users must re-enter ID for each browser session
+4. No user registration or password required
 
 ### Quiz Rules
-1. **Question Selection**: Exactly 10 questions randomly selected from chosen topic
-2. **Time Limit**: 15 seconds per question, auto-advance on timeout
-3. **Answer Policy**: One answer per question, no changes allowed
-4. **Completion**: Quiz must be completed in sequence, no skipping
-5. **Retake Policy**: No retakes allowed for completed quizzes
+1. Each quiz must contain exactly 10 questions
+2. Questions must be randomly selected from chosen topic
+3. No duplicate questions within a single quiz
+4. Each question has exactly 20 seconds for answering
+5. Unanswered questions (timer expired) are marked incorrect
+6. Users can only move forward through questions
 
 ### Scoring Rules
-1. **Point System**: 1 point per correct answer, maximum 10 points
-2. **No Penalties**: No negative scoring for incorrect answers
-3. **Unanswered**: Unanswered questions score 0 points
-4. **Immutability**: Scores cannot be modified once saved
+1. Each correct answer awards exactly 1 point
+2. Incorrect or unanswered questions award 0 points
+3. Maximum possible score per quiz is 10 points
+4. Scores are calculated server-side for validation
 
-### User Rules
-1. **Registration**: Unique email required, password policy enforced
-2. **Session Limit**: One active quiz session per user
-3. **Role-Based Access**: Admin users can manage questions and topics
+### Data Persistence Rules
+1. Quiz sessions are not saved if browser is closed
+2. Quiz results are stored permanently
+3. User statistics are updated after each quiz completion
+4. Only last 5 quiz results are displayed on dashboard
+5. All historical results contribute to average calculations
 
-### Content Rules
-1. **Question Format**: Exactly 4 multiple-choice options required
-2. **Image Policy**: Optional images, 1MB max, JPG/PNG only
-3. **Topic Constraint**: Fixed set of 5 topics, cannot be modified
-4. **Minimum Questions**: Topics need 10+ questions to be available
+### Question Bank Rules
+1. Each topic must have minimum 100 questions
+2. Questions are text-based only (Phase 1)
+3. All questions have equal difficulty within topic
+4. Answer choices are randomized for each presentation
 
-### Leaderboard Rules
-1. **Ranking Logic**: Highest score wins, ties broken by completion time
-2. **Consistency**: Eventually consistent updates acceptable
-3. **Visibility**: Users can see their rank and top performers
+## Data Validation Rules
 
-## Domain Events
+### User ID Validation
+- Format: Alphanumeric characters only
+- Length: Minimum 3, Maximum 20 characters
+- Uniqueness: Must not exist in system
+- Required: Cannot be empty or null
 
-### Event Types
+### Quiz Answer Validation
+- Format: Must be one of A, B, C, D
+- Required: Must select an answer (or timeout)
+- Single Selection: Only one answer per question
+
+### Score Validation
+- Range: 0 to 10 inclusive
+- Type: Integer only
+- Calculation: Must equal count of correct answers
+
+## Entity State Transitions
+
+### Quiz Session States
 ```
-// Authentication Events
-UserRegistered { userId, email, timestamp }
-UserAuthenticated { userId, timestamp }
-UserLoggedOut { userId, timestamp }
-
-// Quiz Events  
-QuizStarted { quizId, userId, topicId, timestamp }
-QuestionAnswered { quizId, questionIndex, answer, timestamp }
-QuizCompleted { quizId, score, timestamp }
-QuizAbandoned { quizId, reason, timestamp }
-
-// Scoring Events
-ScoreCalculated { scoreId, userId, score, timestamp }
-ScoreSaved { scoreId, userId, topicId, score, timestamp }
-LeaderboardUpdated { topicId, userId, newRank, timestamp }
-
-// Content Management Events
-QuestionCreated { questionId, topicId, createdBy, timestamp }
-QuestionUpdated { questionId, changes, updatedBy, timestamp }
-QuestionDeleted { questionId, deletedBy, timestamp }
-QuestionImageUploaded { questionId, imageUrl, timestamp }
+CREATED → IN_PROGRESS → COMPLETED
+    ↓
+ABANDONED (if browser closed)
 ```
 
-### Event Sourcing Considerations
-- Events provide audit trail for all domain changes
-- Events enable eventual consistency for leaderboard updates
-- Events support future analytics and reporting requirements
-- Events allow for system state reconstruction if needed
+### User States
+```
+NEW → ACTIVE → INACTIVE
+  ↓      ↓
+CREATED → RETURNING
+```
 
-## Data Consistency Patterns
+### Question States
+```
+CREATED → ACTIVE → (MAINTAINED)
+```
 
-### Strong Consistency Required
-- User authentication and registration
-- Quiz question selection and initialization
-- Score calculation and saving
+## Performance Considerations
 
-### Eventual Consistency Acceptable
-- Leaderboard rankings and updates
-- Question count per topic
-- User activity statistics
+### Database Indexes
+- Primary keys on all entities
+- Index on `user_id` in Quiz Results table
+- Index on `topic_id` in Questions table
+- Index on `completion_time` for recent results queries
 
-### Conflict Resolution
-- Quiz sessions: Last writer wins for user preferences
-- Leaderboard: Recalculate rankings on conflicts
-- Questions: Admin changes override with audit trail
+### Query Optimization
+- Limit queries for dashboard to last 5 results
+- Use aggregated statistics table for performance metrics
+- Implement efficient random question selection
 
----
+### Data Archiving
+- Consider archiving old quiz results (future enhancement)
+- Maintain statistics table for quick access
+- Optimize for read-heavy workload (dashboard queries)
 
-*Document Version: 1.0*
-*Created: [Current Date]*
-*Status: Complete*
-*Domain Complexity: Simple with Complete Coverage*
+## Security Considerations
+
+### Data Protection
+- User IDs are not sensitive personal information
+- Quiz answers are validated server-side
+- No sensitive data exposed to client
+- Input validation prevents injection attacks
+
+### Access Control
+- Session-based access control
+- No data access without valid session
+- User can only access their own data
