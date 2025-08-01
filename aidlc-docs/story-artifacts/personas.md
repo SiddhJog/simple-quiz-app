@@ -1,83 +1,63 @@
-# User Personas and Roles
+# User Personas
 
-## User Roles Identified
+## Primary Persona: Alex - The Entertainment Seeker
 
-### Primary Roles
-1. **Quiz Taker** - General public users who take quizzes
-2. **Admin** - System administrator who manages questions and topics
+### Demographics
+- **Age Range**: 18-65 (general public)
+- **Occupation**: Various (students, professionals, retirees)
+- **Location**: Global
+- **Device Usage**: Equal comfort with mobile phones and laptops
 
-## User Personas
+### Technical Profile
+- **Technical Proficiency**: Moderately tech-savvy
+- **Comfort Level**: Comfortable with web applications and basic navigation
+- **Device Preference**: Uses both mobile and laptop equally depending on context
 
-### Persona 1: Quiz Taker
-**Role:** Quiz Taker  
-**Demographics:**
-- Age: 18-65 years
-- Education: High school and above
-- Technology: Basic to intermediate web browser skills
-- Location: Global, English-speaking users
+### Goals & Motivations
+- **Primary Goal**: Entertainment and fun
+- **Secondary Goals**:
+  - Quick casual entertainment during breaks
+  - Competitive challenge against personal scores
+  - Social bragging rights about knowledge
+  - Mental stimulation and engagement
 
-**Goals:**
-- Take quizzes on topics of interest
-- Test knowledge and compete with others
-- View scores and leaderboard rankings
-- Have an engaging quiz experience
+### Behaviors
+- Takes quizzes for entertainment purposes
+- Enjoys testing knowledge across different topics
+- Likes to see improvement in scores over time
+- Shares achievements informally with friends/colleagues
+- Uses application during free time or breaks
 
-**Pain Points:**
-- Slow loading times
-- Confusing navigation
-- Technical difficulties during quiz
-- Losing progress due to system issues
+### Pain Points
+- Doesn't want complicated registration processes
+- Gets frustrated with slow loading times
+- Dislikes losing progress unexpectedly
+- Wants immediate feedback on performance
 
-**Technical Proficiency:**
-- Comfortable with web browsers
-- Basic understanding of online forms and buttons
-- Expects intuitive user interfaces
+### Needs & Expectations
+- Simple, intuitive interface
+- Quick access without lengthy setup
+- Variety in quiz topics
+- Clear scoring and progress tracking
+- Responsive design for any device
+- Immediate results and feedback
 
----
+### User Journey
+1. Enters unique ID to start
+2. Views dashboard with past performance
+3. Selects quiz topic of interest
+4. Takes timed quiz with 10 questions
+5. Reviews results and correct answers
+6. Compares performance with previous attempts
 
-### Persona 2: Admin
-**Role:** Admin  
-**Demographics:**
-- Age: 25-50 years
-- Education: College degree or equivalent
-- Technology: Intermediate to advanced technical skills
-- Background: Content management or educational background
+### Frustrations
+- Duplicate ID rejection (needs clear guidance)
+- Timer running out before answering
+- Losing quiz progress if browser closes
+- Not seeing improvement over time
 
-**Goals:**
-- Manage quiz questions efficiently
-- Organize questions by topics
-- Upload images for questions
-- Maintain quality of quiz content
-- Monitor system usage
-
-**Pain Points:**
-- Time-consuming content management
-- Difficulty organizing large question sets
-- Image upload complications
-- Lack of bulk operations
-
-**Technical Proficiency:**
-- Comfortable with content management systems
-- Familiar with file uploads and form management
-- Understanding of data organization principles
-
----
-
-## Role Responsibilities
-
-### Quiz Taker Responsibilities
-- Register and login to the system
-- Select quiz topics
-- Complete quizzes within time limits
-- View personal scores and leaderboard
-
-### Admin Responsibilities
-- Add, edit, and delete quiz questions
-- Manage the 5 quiz topics (General Knowledge, Physics, Chemistry, Bollywood Movies, Hollywood Movies)
-- Upload and manage question images
-- Ensure question quality and accuracy
-
----
-*Document Version: 1.0*
-*Created: [Current Date]*
-*Status: Complete*
+### Success Metrics
+- Completes quizzes regularly
+- Shows improvement in average scores
+- Tries multiple topics
+- Returns for repeat sessions
