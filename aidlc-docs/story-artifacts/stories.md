@@ -1,417 +1,242 @@
 # User Stories
 
-## Authentication & User Management Stories
+## User Authentication & Access
 
-### US-001: User Registration
-**As a** Quiz Taker  
-**I want** to create an account with email and password  
-**So that** I can access quizzes and track my scores  
+### US-001: User ID Entry
+**As a user**, I want to enter a unique alphanumeric user ID so that I can access the quiz application.
 
-**Priority:** Must  
 **Acceptance Criteria:**
-- User can register with valid email and password
-- System validates email format (contains @ and domain)
-- System validates password strength (minimum 8 characters)
-- Duplicate email registration shows error message
-- Successful registration redirects to login page
-- User data is securely stored in database
-- Password is encrypted before storage
+- User can enter alphanumeric characters only
+- System validates ID format before proceeding
+- User cannot access application without valid ID
+- Clear input field with appropriate labeling
 
----
+### US-002: User ID Validation
+**As a user**, I want the system to validate my user ID uniqueness so that I have a distinct identity in the application.
 
-### US-002: User Login
-**As a** Quiz Taker  
-**I want** to login with my credentials  
-**So that** I can access my account and take quizzes  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- User can login with valid email and password
-- Invalid credentials show clear error message
-- Successful login redirects to topic selection page
-- User session is maintained during quiz
-- Session expires after reasonable time period
-- Login form validates required fields
+- System checks ID against existing users
+- Clear error message displayed for duplicate IDs
+- User prompted to enter different ID if duplicate found
+- Validation occurs before dashboard access
 
----
+### US-003: Session-Based Access
+**As a user**, I want to enter my user ID each time I visit so that I maintain control over my session.
 
-### US-003: User Session Management
-**As a** Quiz Taker  
-**I want** my session to be maintained securely  
-**So that** I don't lose progress during quiz  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- User session persists during quiz completion
-- Session tokens are secure and encrypted
-- Automatic logout after session timeout
-- Protection against session hijacking
-- User can logout manually
+- No automatic login or ID persistence
+- User must enter ID for each browser session
+- Previous session data cleared when browser closed
+- Fresh start for each visit
 
----
+## Dashboard & Performance Tracking
 
-## Topic Selection Stories
+### US-004: Dashboard Overview
+**As a user**, I want to see my dashboard with performance data so that I can track my quiz progress.
 
-### US-004: View Available Topics
-**As a** Quiz Taker  
-**I want** to see all available quiz topics  
-**So that** I can choose a topic that interests me  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Display 5 topics: General Knowledge, Physics, Chemistry, Bollywood Movies, Hollywood Movies
-- Topics are displayed in clear, selectable format
-- Only admin-managed topics are shown
-- Topics are visually appealing and easy to identify
-- Page loads within 3 seconds
+- Dashboard displays immediately after ID validation
+- Clean, organized layout of performance metrics
+- Responsive design for mobile and laptop
+- Quick loading of dashboard data
 
----
+### US-005: Recent Quiz Scores
+**As a user**, I want to see my last 5 quiz scores so that I can track my recent performance.
 
-### US-005: Select Quiz Topic
-**As a** Quiz Taker  
-**I want** to select one topic to start a quiz  
-**So that** I can take a quiz on my preferred subject  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- User can select exactly one topic per quiz session
-- Selection is visually indicated
-- Topic selection triggers quiz initialization
-- Selected topic determines question pool
-- Cannot proceed without topic selection
+- Display exactly 5 most recent quiz scores
+- Show score, topic, and date for each quiz
+- Chronological order (newest first)
+- Clear indication if fewer than 5 quizzes taken
 
----
+### US-006: Average Score Display
+**As a user**, I want to see my overall average score so that I can measure my improvement over time.
 
-## Quiz Experience Stories
-
-### US-006: Initialize Quiz
-**As a** Quiz Taker  
-**I want** the system to generate a 10-question quiz  
-**So that** I can start taking the quiz immediately  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Exactly 10 questions are selected from topic question pool
-- Each question has exactly 4 multiple-choice options
-- Questions may include images
-- Questions are presented in random order
-- Quiz loads within 2 seconds
-- Questions are unique within the quiz
+- Calculate average across all quizzes taken
+- Display as clear numerical value
+- Update automatically after each new quiz
+- Show "No data" if no quizzes completed
 
----
+### US-007: Topic Performance Statistics
+**As a user**, I want to see my performance by topic so that I can identify my strengths and weaknesses.
 
-### US-007: View Question with Timer
-**As a** Quiz Taker  
-**I want** to see one question at a time with a countdown timer  
-**So that** I can focus on answering within the time limit  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Question text is clearly displayed
-- Question image (if applicable) is properly loaded and visible
-- 4 answer options are presented as selectable choices
-- 15-second countdown timer is visible and functional
-- Question number indicator shows progress (e.g., "Question 3 of 10")
-- Timer updates every second
-- Visual warning when time is running out
+- Display performance for each topic attempted
+- Show average score per topic
+- Include number of quizzes taken per topic
+- Clear visual representation of data
 
----
+### US-008: Average Response Time
+**As a user**, I want to see my average time to answer questions so that I can understand my response patterns.
 
-### US-008: Select Answer
-**As a** Quiz Taker  
-**I want** to select one answer per question  
-**So that** I can provide my response within the time limit  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- User can select exactly one answer option
-- Selection is visually indicated (highlighted/checked)
-- Cannot select multiple answers
-- Selection is recorded immediately
-- No answer review or change is allowed after selection
+- Calculate average response time across all questions
+- Display in seconds or appropriate time format
+- Update after each quiz completion
+- Show per-topic response times if available
 
----
+## Quiz Selection & Initiation
 
-### US-009: Auto-Advance Questions
-**As a** Quiz Taker  
-**I want** the quiz to automatically progress to the next question  
-**So that** I can continue the quiz without manual navigation  
+### US-009: Start New Quiz Button
+**As a user**, I want to click a "Start New Quiz" button so that I can begin a new quiz session.
 
-**Priority:** Must  
 **Acceptance Criteria:**
-- After answer selection, next question loads automatically within 1 second
-- When timer expires, next question loads automatically (no answer recorded)
-- No pause, resume, or navigation between questions
-- Progress indicator updates with each question
-- Smooth transition between questions
+- Prominent button visible on dashboard
+- Clear labeling and intuitive placement
+- Button leads to topic selection
+- Responsive on all devices
 
----
+### US-010: Topic Selection
+**As a user**, I want to select from available quiz topics so that I can choose subjects that interest me.
 
-### US-010: Complete Quiz Flow
-**As a** Quiz Taker  
-**I want** to progress through all 10 questions seamlessly  
-**So that** I can complete the entire quiz experience  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Quiz progresses through all 10 questions automatically
-- Cannot skip questions or go back
-- Quiz cannot be retaken once completed
-- Progress indicator shows current question number
-- Final question transitions to results page
+- Display all available topics (General Knowledge, Science, Films)
+- Clear topic names and descriptions
+- Single-click selection process
+- Visual feedback for selected topic
 
----
+### US-011: Random Question Selection
+**As a user**, I want questions to be randomly selected from the topic so that each quiz is unique.
 
-## Scoring & Results Stories
-
-### US-011: Calculate Score
-**As a** Quiz Taker  
-**I want** my score to be calculated automatically  
-**So that** I can see my quiz performance immediately  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Each correct answer awards exactly 1 point
-- Maximum possible score is 10 points
-- No partial credit or negative scoring
-- Unanswered questions score 0 points
-- Score calculation is accurate and immediate
-- Score calculation completes within 2 seconds
+- System selects exactly 10 questions randomly
+- No duplicate questions within same quiz
+- Questions drawn from topic's question bank
+- Different questions for repeat topic attempts
 
----
+## Quiz Taking Experience
 
-### US-012: View Results
-**As a** Quiz Taker  
-**I want** to see my final score after completing the quiz  
-**So that** I can know how well I performed  
+### US-012: Question Display
+**As a user**, I want to see quiz questions with 4 answer choices so that I can select my response.
 
-**Priority:** Must  
 **Acceptance Criteria:**
-- Score is displayed as "X out of 10" format
-- Results are shown immediately after last question
-- No detailed answer explanations provided
-- No pass/fail threshold applied
-- Results page is clear and easy to understand
-- Option to view leaderboard from results page
+- Display one question at a time
+- Show exactly 4 answer choices
+- Clear question text and readable format
+- Answer choices randomized for each question
 
----
+### US-013: Answer Selection
+**As a user**, I want to select one answer from the choices so that I can respond to the question.
 
-### US-013: Save Score
-**As a** Quiz Taker  
-**I want** my score to be saved to my account  
-**So that** I can track my performance over time  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- User score is saved with timestamp and topic
-- Score is linked to user account
-- Historical scores are maintained
-- Data persists across sessions
-- Score is immediately available for leaderboard
+- Single selection allowed per question
+- Visual feedback for selected answer
+- Ability to change selection before time expires
+- Clear indication of selected choice
 
----
+### US-014: Question Timer
+**As a user**, I want to see a 20-second countdown timer so that I know how much time I have to answer.
 
-## Leaderboard Stories
-
-### US-014: View Leaderboard
-**As a** Quiz Taker  
-**I want** to see the leaderboard after completing a quiz  
-**So that** I can compare my performance with other users  
-
-**Priority:** Should  
 **Acceptance Criteria:**
-- User is placed on leaderboard based on score
-- Leaderboard shows user rankings
-- User can view their position relative to others
-- Leaderboard updates in real-time
-- Shows top performers and user's current position
-- Leaderboard loads within 3 seconds
+- Visible countdown timer showing remaining seconds
+- Timer starts when question displays
+- Clear visual indication of time remaining
+- Timer accurate to within 1 second
 
----
+### US-015: Timer Expiration Handling
+**As a user**, I want the system to automatically move to the next question when time expires so that the quiz continues smoothly.
 
-## Admin Management Stories
-
-### US-015: Admin Login
-**As an** Admin  
-**I want** to login to the admin panel  
-**So that** I can manage quiz questions and topics  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Admin can login with admin credentials
-- Admin panel is separate from user interface
-- Secure authentication for admin access
-- Admin session management
-- Access control to admin functions only
+- Automatic progression when timer reaches zero
+- Current question marked as incorrect
+- No user intervention required
+- Smooth transition to next question
 
----
+### US-016: Forward-Only Navigation
+**As a user**, I want to move forward through questions only so that I focus on each question individually.
 
-### US-016: Add Questions
-**As an** Admin  
-**I want** to add new quiz questions  
-**So that** I can expand the question pool for each topic  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Admin can create new questions with text
-- Admin can add exactly 4 answer options per question
-- Admin can mark one option as correct answer
-- Admin can assign question to specific topic
-- Admin can upload images for questions
-- Form validation for required fields
-- Questions are immediately available for quizzes
+- No back button or previous question access
+- Automatic progression after answer selection or timeout
+- Question counter showing progress (e.g., "3 of 10")
+- Clear indication of quiz progression
 
----
+### US-017: Quiz Progress Indicator
+**As a user**, I want to see my progress through the quiz so that I know how many questions remain.
 
-### US-017: Edit Questions
-**As an** Admin  
-**I want** to edit existing quiz questions  
-**So that** I can correct errors or improve question quality  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Admin can modify question text
-- Admin can edit answer options
-- Admin can change correct answer
-- Admin can update question images
-- Admin can reassign questions to different topics
-- Changes are reflected immediately in active quizzes
+- Display current question number and total
+- Visual progress bar or indicator
+- Clear and prominent placement
+- Updates with each question
 
----
+## Scoring & Results
 
-### US-018: Delete Questions
-**As an** Admin  
-**I want** to delete quiz questions  
-**So that** I can remove outdated or incorrect questions  
+### US-018: Score Calculation
+**As a user**, I want to receive 1 point for each correct answer so that my score reflects my performance.
 
-**Priority:** Must  
 **Acceptance Criteria:**
-- Admin can delete individual questions
-- Confirmation prompt before deletion
-- Deleted questions are removed from question pool
-- Cannot delete questions currently in active quizzes
-- Deletion is permanent and irreversible
+- 1 point awarded for correct answers only
+- 0 points for incorrect or timed-out answers
+- Maximum possible score of 10 points
+- Score calculated automatically
 
----
+### US-019: Final Score Display
+**As a user**, I want to see my final score immediately after completing the quiz so that I know my performance.
 
-### US-019: Manage Topics
-**As an** Admin  
-**I want** to manage the 5 quiz topics  
-**So that** I can organize questions effectively  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Admin can view all 5 topics: General Knowledge, Physics, Chemistry, Bollywood Movies, Hollywood Movies
-- Admin can see question count per topic
-- Admin can view questions within each topic
-- Topics cannot be deleted (fixed set of 5)
-- Topic names cannot be changed
+- Score displayed immediately after last question
+- Clear numerical format (e.g., "7 out of 10")
+- Prominent display on results screen
+- Score saved to user history
 
----
+### US-020: Correct Answer Review
+**As a user**, I want to see the correct answers after completing the quiz so that I can learn from my mistakes.
 
-### US-020: Upload Question Images
-**As an** Admin  
-**I want** to upload images for quiz questions  
-**So that** I can create more engaging visual questions  
-
-**Priority:** Should  
 **Acceptance Criteria:**
-- Admin can upload image files (JPG, PNG)
-- Image file size validation (max 2MB)
-- Image preview before saving
-- Images are properly stored and accessible
-- Images display correctly in quiz interface
-- Option to remove or replace images
+- Display all 10 questions with correct answers
+- Show user's selected answer vs correct answer
+- Clear indication of right/wrong responses
+- Easy to read format for review
 
----
+### US-021: Results Storage
+**As a user**, I want my quiz results to be saved so that they appear in my dashboard statistics.
 
-## Technical & Infrastructure Stories
-
-### US-021: Database Setup
-**As a** Developer  
-**I want** to set up DynamoDB tables  
-**So that** the application can store user and quiz data  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- User table with proper schema
-- Questions table with topic indexing
-- Scores table with user and timestamp indexing
-- Proper primary keys and indexes for performance
-- Tables support 1000 concurrent users
-- Data consistency and integrity maintained
+- Results automatically saved after quiz completion
+- Data includes score, topic, date, and time
+- Results appear in dashboard immediately
+- Storage persists across sessions
 
----
+## Error Handling
 
-### US-022: API Development
-**As a** Developer  
-**I want** to create Python backend APIs  
-**So that** the frontend can interact with the database  
+### US-022: Duplicate User ID Error
+**As a user**, I want to receive a clear error message when I enter a duplicate user ID so that I can choose a different one.
 
-**Priority:** Must  
 **Acceptance Criteria:**
-- Authentication APIs (register, login, logout)
-- Quiz APIs (get topics, get questions, submit answers)
-- Score APIs (calculate, save, retrieve)
-- Leaderboard APIs (get rankings)
-- Admin APIs (CRUD operations for questions)
-- APIs handle 1000 concurrent requests
-- Response times under 2 seconds
+- Clear error message explaining the issue
+- Suggestion to try a different ID
+- Input field remains accessible for retry
+- No access granted until unique ID provided
 
----
+### US-023: Network Connection Error
+**As a user**, I want to be notified if there are network issues so that I understand why the application isn't working.
 
-### US-023: Frontend Development
-**As a** Developer  
-**I want** to create React.js frontend  
-**So that** users can interact with the quiz application  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Responsive design for all screen sizes
-- Compatible with Chrome, Firefox, Safari, Edge
-- Clean, modern user interface
-- Intuitive navigation and user flow
-- Real-time timer functionality
-- Image display capabilities
-- Mobile-friendly design
+- Clear error message for connection problems
+- Suggestion to check internet connection
+- Retry option when connection restored
+- Graceful handling without application crash
 
----
+### US-024: Quiz Session Loss
+**As a user**, I want to understand that closing my browser will lose my quiz progress so that I can make informed decisions.
 
-### US-024: Performance Optimization
-**As a** Developer  
-**I want** to optimize application performance  
-**So that** it can handle 1000 concurrent users  
-
-**Priority:** Must  
 **Acceptance Criteria:**
-- Page load times under 3 seconds
-- Question transitions under 1 second
-- Score calculation under 2 seconds
-- Database queries optimized
-- Efficient image loading
-- Proper caching mechanisms
-- Load testing validates 1000 concurrent users
+- Warning message about session loss (if applicable)
+- Clear indication that progress isn't saved
+- User understands consequences of browser closure
+- No false expectations about progress recovery
 
----
+## Administrative Functions
 
-### US-025: Security Implementation
-**As a** Developer  
-**I want** to implement security measures  
-**So that** user data and quiz content are protected  
+### US-025: Question Bank Setup
+**As an administrator**, I want to create a database script to populate question banks so that users have quiz content available.
 
-**Priority:** Must  
 **Acceptance Criteria:**
-- Password encryption and secure storage
-- Secure session management
-- Protection against common web vulnerabilities
-- Quiz questions protected from unauthorized access
-- Input validation and sanitization
-- HTTPS implementation
-- Secure API endpoints
-
----
-
-*Document Version: 1.0*
-*Created: [Current Date]*
-*Total Stories: 25*
-*Status: Complete*
+- Script creates questions for all topics (General Knowledge, Science, Films)
+- Each topic contains at least 100 questions
+- Each question has exactly 4 answers with 1 correct answer
+- Script can be executed to populate database
+- Questions are text-based only
+- Data structure supports random selection
