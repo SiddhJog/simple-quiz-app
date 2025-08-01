@@ -1,793 +1,493 @@
 # API Specification
 
 ## Overview
-This document provides the complete REST API specification for the Simple Quiz Application using OpenAPI 3.0 standards.
+This document defines the REST API endpoints for the quiz application backend, including request/response schemas, authentication, and error handling.
 
 ## Base Configuration
+- **Base URL**: `http://localhost:8000/api/v1`
+- **Protocol**: HTTP/HTTPS
+- **Data Format**: JSON
+- **Authentication**: Session cookies
+- **CORS**: Enabled for frontend domain
 
-**Base URL**: `/api/v1`  
-**Protocol**: HTTPS  
-**Content-Type**: `application/json`  
-**Authentication**: Bearer Token (JWT)
+## Authentication
 
-## Authentication APIs
+### Session Management
+- **Method**: Session cookies
+- **Cookie Name**: `quiz_session`
+- **Expiration**: Browser session (no persistence)
+- **Security**: HttpOnly, Secure (in production)
 
-### POST /api/v1/auth/register
-**Description**: Register a new user account
+### Authentication Flow
+1. User validates ID → Server creates session cookie
+2. All subsequent requests include session cookie
+3. Server validates session for protected endpoints
+4. Session expires when browser closes
 
-**Request Schema**:
+## API Endpoints
+
+### 1. User Authentication
+
+#### POST /auth/validate-user
+**Purpose**: Validate user ID and create session
+
+**Request**:
 ```json
 {
-  "email": "string (required, email format)",
-  "password": "string (required, min 8 chars, 1 uppercase, 1 lowercase, 1 special)"
+  "user_id": "string (alphanumeric, 3-20 chars)"
 }
 ```
 
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "User registered successfully",
-  "data": {
-    "userId": "string",
-    "email": "string"
-  }
-}
-```
-
-**Error Responses**:
-- `400 Bad Request`: Invalid input data
-- `409 Conflict`: Email already exists
-- `500 Internal Server Error`: Server error
-
-**Example Request**:
-```json
-{
-  "email": "user@example.com",
-  "password": "SecurePass123!"
-}
-```
-
-**Example Response**:
+**Response (Success - 200)**:
 ```json
 {
   "success": true,
-  "message": "User registered successfully",
-  "data": {
-    "userId": "usr_1234567890",
-    "email": "user@example.com"
-  }
+  "message": "User validated successfully",
+  "user_id": "john123",
+  "session_created": true
 }
 ```
 
----
-
-### POST /api/v1/auth/login
-**Description**: Authenticate user and return JWT token
-
-**Request Schema**:
-```json
-{
-  "email": "string (required)",
-  "password": "string (required)"
-}
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Login successful",
-  "data": {
-    "token": "string (JWT)",
-    "userId": "string",
-    "expiresIn": "number (seconds)"
-  }
-}
-```
-
-**Error Responses**:
-- `400 Bad Request`: Missing credentials
-- `401 Unauthorized`: Invalid credentials
-- `500 Internal Server Error`: Server error
-
-**Example Request**:
-```json
-{
-  "email": "user@example.com",
-  "password": "SecurePass123!"
-}
-```
-
-**Example Response**:
-```json
-{
-  "success": true,
-  "message": "Login successful",
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "userId": "usr_1234567890",
-    "expiresIn": 3600
-  }
-}
-```
-
----
-
-### GET /api/v1/auth/validate
-**Description**: Validate JWT token and return user info
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Token is valid",
-  "data": {
-    "userId": "string",
-    "email": "string",
-    "role": "string"
-  }
-}
-```
-
-**Error Responses**:
-- `401 Unauthorized`: Invalid or expired token
-- `500 Internal Server Error`: Server error
-
----
-
-### POST /api/v1/auth/logout
-**Description**: Logout user (client-side token removal)
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Logout successful"
-}
-```
-
-## Quiz Management APIs
-
-### GET /api/v1/topics
-**Description**: Get all available quiz topics
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Topics retrieved successfully",
-  "data": {
-    "topics": [
-      {
-        "id": "string",
-        "name": "string",
-        "description": "string",
-        "questionCount": "number",
-        "isActive": "boolean"
-      }
-    ]
-  }
-}
-```
-
-**Error Responses**:
-- `401 Unauthorized`: Invalid token
-- `500 Internal Server Error`: Server error
-
-**Example Response**:
-```json
-{
-  "success": true,
-  "message": "Topics retrieved successfully",
-  "data": {
-    "topics": [
-      {
-        "id": "topic_general",
-        "name": "General Knowledge",
-        "description": "General knowledge questions",
-        "questionCount": 25,
-        "isActive": true
-      },
-      {
-        "id": "topic_physics",
-        "name": "Physics",
-        "description": "Physics questions",
-        "questionCount": 30,
-        "isActive": true
-      }
-    ]
-  }
-}
-```
-
----
-
-### POST /api/v1/quiz/start
-**Description**: Initialize a new quiz session
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Request Schema**:
-```json
-{
-  "topicId": "string (required)"
-}
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Quiz started successfully",
-  "data": {
-    "quizId": "string",
-    "topicId": "string",
-    "totalQuestions": 10,
-    "timePerQuestion": 15,
-    "questions": [
-      {
-        "id": "string",
-        "text": "string",
-        "options": ["string", "string", "string", "string"],
-        "imageUrl": "string (optional)"
-      }
-    ]
-  }
-}
-```
-
-**Error Responses**:
-- `400 Bad Request`: Invalid topic ID
-- `401 Unauthorized`: Invalid token
-- `409 Conflict`: User already has active quiz
-- `500 Internal Server Error`: Server error
-
-**Example Request**:
-```json
-{
-  "topicId": "topic_general"
-}
-```
-
-**Example Response**:
-```json
-{
-  "success": true,
-  "message": "Quiz started successfully",
-  "data": {
-    "quizId": "quiz_1234567890",
-    "topicId": "topic_general",
-    "totalQuestions": 10,
-    "timePerQuestion": 15,
-    "questions": [
-      {
-        "id": "q1",
-        "text": "What is the capital of France?",
-        "options": ["London", "Berlin", "Paris", "Madrid"],
-        "imageUrl": null
-      }
-    ]
-  }
-}
-```
-
----
-
-### POST /api/v1/quiz/submit
-**Description**: Submit quiz answers and get results
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Request Schema**:
-```json
-{
-  "quizId": "string (required)",
-  "answers": [
-    {
-      "questionId": "string",
-      "selectedOption": "number (0-3, null for no answer)"
-    }
-  ]
-}
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Quiz submitted successfully",
-  "data": {
-    "score": "number (0-10)",
-    "totalQuestions": 10,
-    "correctAnswers": "number",
-    "leaderboardPosition": "number",
-    "completedAt": "string (ISO datetime)"
-  }
-}
-```
-
-**Error Responses**:
-- `400 Bad Request`: Invalid quiz ID or answers
-- `401 Unauthorized`: Invalid token
-- `404 Not Found`: Quiz not found
-- `409 Conflict`: Quiz already submitted
-- `500 Internal Server Error`: Server error
-
-**Example Request**:
-```json
-{
-  "quizId": "quiz_1234567890",
-  "answers": [
-    {
-      "questionId": "q1",
-      "selectedOption": 2
-    },
-    {
-      "questionId": "q2",
-      "selectedOption": null
-    }
-  ]
-}
-```
-
-**Example Response**:
-```json
-{
-  "success": true,
-  "message": "Quiz submitted successfully",
-  "data": {
-    "score": 7,
-    "totalQuestions": 10,
-    "correctAnswers": 7,
-    "leaderboardPosition": 15,
-    "completedAt": "2024-01-15T10:30:00Z"
-  }
-}
-```
-
-## Score & Leaderboard APIs
-
-### GET /api/v1/scores/user/{userId}
-**Description**: Get user's quiz score history
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Path Parameters**:
-- `userId`: string (required)
-
-**Query Parameters**:
-- `topicId`: string (optional, filter by topic)
-- `limit`: number (optional, default 10)
-- `offset`: number (optional, default 0)
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Scores retrieved successfully",
-  "data": {
-    "scores": [
-      {
-        "scoreId": "string",
-        "topicId": "string",
-        "topicName": "string",
-        "score": "number",
-        "totalQuestions": 10,
-        "completedAt": "string (ISO datetime)"
-      }
-    ],
-    "pagination": {
-      "total": "number",
-      "limit": "number",
-      "offset": "number"
-    }
-  }
-}
-```
-
-**Error Responses**:
-- `401 Unauthorized`: Invalid token
-- `403 Forbidden`: Cannot access other user's scores
-- `500 Internal Server Error`: Server error
-
----
-
-### GET /api/v1/leaderboard
-**Description**: Get leaderboard rankings
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Query Parameters**:
-- `topicId`: string (optional, filter by topic)
-- `limit`: number (optional, default 10)
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Leaderboard retrieved successfully",
-  "data": {
-    "rankings": [
-      {
-        "rank": "number",
-        "userId": "string",
-        "userName": "string",
-        "score": "number",
-        "achievedAt": "string (ISO datetime)"
-      }
-    ],
-    "userRanking": {
-      "rank": "number",
-      "score": "number",
-      "achievedAt": "string (ISO datetime)"
-    }
-  }
-}
-```
-
-**Error Responses**:
-- `401 Unauthorized`: Invalid token
-- `500 Internal Server Error`: Server error
-
-**Example Response**:
-```json
-{
-  "success": true,
-  "message": "Leaderboard retrieved successfully",
-  "data": {
-    "rankings": [
-      {
-        "rank": 1,
-        "userId": "usr_9876543210",
-        "userName": "TopPlayer",
-        "score": 10,
-        "achievedAt": "2024-01-15T09:00:00Z"
-      },
-      {
-        "rank": 2,
-        "userId": "usr_1111111111",
-        "userName": "SecondPlace",
-        "score": 9,
-        "achievedAt": "2024-01-15T10:00:00Z"
-      }
-    ],
-    "userRanking": {
-      "rank": 15,
-      "score": 7,
-      "achievedAt": "2024-01-15T10:30:00Z"
-    }
-  }
-}
-```
-
-## Admin Management APIs
-
-### POST /api/v1/admin/questions
-**Description**: Create a new question (Admin only)
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Request Schema**:
-```json
-{
-  "topicId": "string (required)",
-  "questionText": "string (required)",
-  "options": ["string", "string", "string", "string"] (required, exactly 4),
-  "correctAnswerIndex": "number (required, 0-3)",
-  "imageUrl": "string (optional)"
-}
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Question created successfully",
-  "data": {
-    "questionId": "string",
-    "topicId": "string",
-    "questionText": "string",
-    "options": ["string", "string", "string", "string"],
-    "correctAnswerIndex": "number",
-    "imageUrl": "string",
-    "createdAt": "string (ISO datetime)"
-  }
-}
-```
-
-**Error Responses**:
-- `400 Bad Request`: Invalid question data
-- `401 Unauthorized`: Invalid token
-- `403 Forbidden`: Not admin user
-- `500 Internal Server Error`: Server error
-
----
-
-### PUT /api/v1/admin/questions/{questionId}
-**Description**: Update existing question (Admin only)
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Path Parameters**:
-- `questionId`: string (required)
-
-**Request Schema**:
-```json
-{
-  "questionText": "string (optional)",
-  "options": ["string", "string", "string", "string"] (optional),
-  "correctAnswerIndex": "number (optional, 0-3)",
-  "imageUrl": "string (optional)"
-}
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Question updated successfully",
-  "data": {
-    "questionId": "string",
-    "topicId": "string",
-    "questionText": "string",
-    "options": ["string", "string", "string", "string"],
-    "correctAnswerIndex": "number",
-    "imageUrl": "string",
-    "updatedAt": "string (ISO datetime)"
-  }
-}
-```
-
-**Error Responses**:
-- `400 Bad Request`: Invalid question data
-- `401 Unauthorized`: Invalid token
-- `403 Forbidden`: Not admin user
-- `404 Not Found`: Question not found
-- `500 Internal Server Error`: Server error
-
----
-
-### DELETE /api/v1/admin/questions/{questionId}
-**Description**: Delete question (Admin only)
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Path Parameters**:
-- `questionId`: string (required)
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Question deleted successfully"
-}
-```
-
-**Error Responses**:
-- `401 Unauthorized`: Invalid token
-- `403 Forbidden`: Not admin user
-- `404 Not Found`: Question not found
-- `409 Conflict`: Question in use by active quizzes
-- `500 Internal Server Error`: Server error
-
----
-
-### POST /api/v1/admin/images
-**Description**: Upload question image (Admin only)
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-Content-Type: multipart/form-data
-```
-
-**Request Body**:
-```
-image: file (required, JPG/PNG, max 1MB)
-questionId: string (required)
-```
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Image uploaded successfully",
-  "data": {
-    "imageUrl": "string (S3 URL)",
-    "questionId": "string"
-  }
-}
-```
-
-**Error Responses**:
-- `400 Bad Request`: Invalid file format or size
-- `401 Unauthorized`: Invalid token
-- `403 Forbidden`: Not admin user
-- `404 Not Found`: Question not found
-- `500 Internal Server Error`: Server error
-
----
-
-### GET /api/v1/admin/topics/{topicId}/questions
-**Description**: Get all questions for a topic (Admin only)
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Path Parameters**:
-- `topicId`: string (required)
-
-**Query Parameters**:
-- `limit`: number (optional, default 50)
-- `offset`: number (optional, default 0)
-
-**Response Schema**:
-```json
-{
-  "success": true,
-  "message": "Questions retrieved successfully",
-  "data": {
-    "questions": [
-      {
-        "questionId": "string",
-        "questionText": "string",
-        "options": ["string", "string", "string", "string"],
-        "correctAnswerIndex": "number",
-        "imageUrl": "string",
-        "isActive": "boolean",
-        "createdAt": "string (ISO datetime)"
-      }
-    ],
-    "pagination": {
-      "total": "number",
-      "limit": "number",
-      "offset": "number"
-    }
-  }
-}
-```
-
-**Error Responses**:
-- `401 Unauthorized`: Invalid token
-- `403 Forbidden`: Not admin user
-- `404 Not Found`: Topic not found
-- `500 Internal Server Error`: Server error
-
-## Error Response Format
-
-All API errors follow a consistent format:
-
+**Response (Error - 400)**:
 ```json
 {
   "success": false,
-  "error": {
-    "code": "string (error code)",
-    "message": "string (human readable message)",
-    "details": "string (optional additional details)"
+  "error": "DUPLICATE_USER_ID",
+  "message": "User ID already exists. Please choose a different ID."
+}
+```
+
+**Response (Error - 400)**:
+```json
+{
+  "success": false,
+  "error": "INVALID_FORMAT",
+  "message": "User ID must be alphanumeric and 3-20 characters long."
+}
+```
+
+#### POST /auth/logout
+**Purpose**: Clear user session
+
+**Request**: No body required
+
+**Response (Success - 200)**:
+```json
+{
+  "success": true,
+  "message": "Session cleared successfully"
+}
+```
+
+### 2. Dashboard Data
+
+#### GET /dashboard/stats
+**Purpose**: Get user dashboard statistics
+**Authentication**: Required
+
+**Response (Success - 200)**:
+```json
+{
+  "success": true,
+  "data": {
+    "user_id": "john123",
+    "recent_scores": [
+      {
+        "score": 8,
+        "total": 10,
+        "topic": "General Knowledge",
+        "completion_time": "2024-01-15T10:30:00Z"
+      }
+    ],
+    "overall_average": 7.2,
+    "total_quizzes": 15,
+    "average_response_time": 12.5,
+    "topic_performance": [
+      {
+        "topic": "General Knowledge",
+        "average_score": 7.5,
+        "quizzes_taken": 8
+      },
+      {
+        "topic": "Science",
+        "average_score": 6.8,
+        "quizzes_taken": 4
+      }
+    ]
   }
 }
 ```
 
-### Common Error Codes
+**Response (Error - 401)**:
+```json
+{
+  "success": false,
+  "error": "UNAUTHORIZED",
+  "message": "Valid session required"
+}
+```
 
-**Authentication Errors**:
-- `AUTH_INVALID_CREDENTIALS`: Invalid email or password
-- `AUTH_TOKEN_EXPIRED`: JWT token has expired
-- `AUTH_TOKEN_INVALID`: JWT token is malformed or invalid
-- `AUTH_EMAIL_EXISTS`: Email already registered
+### 3. Quiz Topics
 
-**Validation Errors**:
-- `VALIDATION_FAILED`: Request data validation failed
-- `VALIDATION_EMAIL_FORMAT`: Invalid email format
-- `VALIDATION_PASSWORD_POLICY`: Password doesn't meet policy
+#### GET /quiz/topics
+**Purpose**: Get available quiz topics
+**Authentication**: Required
 
-**Business Logic Errors**:
-- `QUIZ_ALREADY_ACTIVE`: User has an active quiz session
-- `QUIZ_NOT_FOUND`: Quiz session not found
-- `QUIZ_ALREADY_COMPLETED`: Quiz already submitted
-- `TOPIC_INSUFFICIENT_QUESTIONS`: Topic has less than 10 questions
+**Response (Success - 200)**:
+```json
+{
+  "success": true,
+  "data": {
+    "topics": [
+      {
+        "topic_id": 1,
+        "topic_name": "General Knowledge",
+        "description": "Questions covering various general topics",
+        "question_count": 150
+      },
+      {
+        "topic_id": 2,
+        "topic_name": "Science",
+        "description": "Questions about scientific concepts and discoveries",
+        "question_count": 120
+      },
+      {
+        "topic_id": 3,
+        "topic_name": "Films",
+        "description": "Questions about movies, actors, and cinema",
+        "question_count": 110
+      }
+    ]
+  }
+}
+```
 
-**Authorization Errors**:
-- `ACCESS_DENIED`: User doesn't have required permissions
-- `ADMIN_REQUIRED`: Admin role required for this operation
+### 4. Quiz Session Management
 
-**Resource Errors**:
-- `RESOURCE_NOT_FOUND`: Requested resource not found
-- `RESOURCE_CONFLICT`: Resource conflict (e.g., duplicate)
+#### POST /quiz/start
+**Purpose**: Start a new quiz session
+**Authentication**: Required
 
-**Server Errors**:
-- `INTERNAL_ERROR`: Generic server error
+**Request**:
+```json
+{
+  "topic_id": 1
+}
+```
+
+**Response (Success - 200)**:
+```json
+{
+  "success": true,
+  "data": {
+    "session_id": "sess_abc123",
+    "topic": {
+      "topic_id": 1,
+      "topic_name": "General Knowledge"
+    },
+    "total_questions": 10,
+    "time_per_question": 20
+  }
+}
+```
+
+#### GET /quiz/question/{session_id}/{question_number}
+**Purpose**: Get specific question for quiz session
+**Authentication**: Required
+
+**Parameters**:
+- `session_id`: Quiz session identifier
+- `question_number`: Question number (1-10)
+
+**Response (Success - 200)**:
+```json
+{
+  "success": true,
+  "data": {
+    "question_number": 1,
+    "total_questions": 10,
+    "question_id": 456,
+    "question_text": "What is the capital of France?",
+    "options": [
+      {
+        "option_id": "A",
+        "text": "London"
+      },
+      {
+        "option_id": "B", 
+        "text": "Berlin"
+      },
+      {
+        "option_id": "C",
+        "text": "Paris"
+      },
+      {
+        "option_id": "D",
+        "text": "Madrid"
+      }
+    ]
+  }
+}
+```
+
+**Response (Error - 404)**:
+```json
+{
+  "success": false,
+  "error": "SESSION_NOT_FOUND",
+  "message": "Quiz session not found or expired"
+}
+```
+
+#### POST /quiz/answer
+**Purpose**: Submit answer for current question
+**Authentication**: Required
+
+**Request**:
+```json
+{
+  "session_id": "sess_abc123",
+  "question_id": 456,
+  "selected_answer": "C",
+  "response_time": 15.2
+}
+```
+
+**Response (Success - 200)**:
+```json
+{
+  "success": true,
+  "data": {
+    "correct": true,
+    "question_number": 1,
+    "next_question": 2,
+    "quiz_completed": false
+  }
+}
+```
+
+**Response (Quiz Completed - 200)**:
+```json
+{
+  "success": true,
+  "data": {
+    "correct": false,
+    "question_number": 10,
+    "quiz_completed": true,
+    "final_score": 7,
+    "total_questions": 10
+  }
+}
+```
+
+### 5. Quiz Results
+
+#### GET /quiz/results/{session_id}
+**Purpose**: Get detailed quiz results
+**Authentication**: Required
+
+**Response (Success - 200)**:
+```json
+{
+  "success": true,
+  "data": {
+    "session_id": "sess_abc123",
+    "user_id": "john123",
+    "topic": "General Knowledge",
+    "final_score": 7,
+    "total_questions": 10,
+    "completion_time": "2024-01-15T10:45:00Z",
+    "time_taken": 180,
+    "average_response_time": 18.0,
+    "questions": [
+      {
+        "question_number": 1,
+        "question_text": "What is the capital of France?",
+        "user_answer": "C",
+        "correct_answer": "C",
+        "is_correct": true,
+        "response_time": 15.2
+      },
+      {
+        "question_number": 2,
+        "question_text": "Who painted the Mona Lisa?",
+        "user_answer": "B",
+        "correct_answer": "A",
+        "is_correct": false,
+        "response_time": 20.0
+      }
+    ]
+  }
+}
+```
+
+#### POST /quiz/save-result
+**Purpose**: Save quiz result to user history
+**Authentication**: Required
+
+**Request**:
+```json
+{
+  "session_id": "sess_abc123",
+  "final_score": 7,
+  "completion_time": "2024-01-15T10:45:00Z",
+  "time_taken": 180,
+  "average_response_time": 18.0
+}
+```
+
+**Response (Success - 200)**:
+```json
+{
+  "success": true,
+  "message": "Quiz result saved successfully",
+  "result_id": 789
+}
+```
+
+### 6. Error Handling
+
+#### Common Error Responses
+
+**400 Bad Request**:
+```json
+{
+  "success": false,
+  "error": "VALIDATION_ERROR",
+  "message": "Invalid request data",
+  "details": {
+    "field": "user_id",
+    "issue": "Must be alphanumeric"
+  }
+}
+```
+
+**401 Unauthorized**:
+```json
+{
+  "success": false,
+  "error": "UNAUTHORIZED",
+  "message": "Valid session required"
+}
+```
+
+**404 Not Found**:
+```json
+{
+  "success": false,
+  "error": "RESOURCE_NOT_FOUND",
+  "message": "Requested resource not found"
+}
+```
+
+**500 Internal Server Error**:
+```json
+{
+  "success": false,
+  "error": "INTERNAL_ERROR",
+  "message": "An unexpected error occurred"
+}
+```
+
+**503 Service Unavailable**:
+```json
+{
+  "success": false,
+  "error": "SERVICE_UNAVAILABLE",
+  "message": "Service temporarily unavailable"
+}
+```
+
+## Error Codes Reference
+
+### Authentication Errors
+- `DUPLICATE_USER_ID`: User ID already exists
+- `INVALID_FORMAT`: User ID format validation failed
+- `UNAUTHORIZED`: No valid session found
+- `SESSION_EXPIRED`: Session has expired
+
+### Quiz Errors
+- `SESSION_NOT_FOUND`: Quiz session not found
+- `INVALID_QUESTION`: Question number out of range
+- `QUIZ_COMPLETED`: Attempting to answer completed quiz
+- `INVALID_ANSWER`: Answer format validation failed
+
+### Data Errors
+- `VALIDATION_ERROR`: Request data validation failed
+- `RESOURCE_NOT_FOUND`: Requested resource doesn't exist
 - `DATABASE_ERROR`: Database operation failed
-- `EXTERNAL_SERVICE_ERROR`: External service (S3) error
 
-## Rate Limiting
+### System Errors
+- `INTERNAL_ERROR`: Unexpected server error
+- `SERVICE_UNAVAILABLE`: Service temporarily down
+- `RATE_LIMITED`: Too many requests (future enhancement)
 
-**Limits**:
-- Authentication endpoints: 5 requests per minute per IP
-- Quiz endpoints: 10 requests per minute per user
-- Admin endpoints: 20 requests per minute per admin
-- General endpoints: 100 requests per minute per user
+## Request/Response Headers
 
-**Headers**:
+### Standard Headers
 ```
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 95
-X-RateLimit-Reset: 1640995200
+Content-Type: application/json
+Accept: application/json
 ```
 
-## Authentication Flow
-
-1. **Registration**: `POST /api/v1/auth/register`
-2. **Login**: `POST /api/v1/auth/login` → Returns JWT token
-3. **API Calls**: Include `Authorization: Bearer <token>` header
-4. **Token Validation**: Automatic validation on protected endpoints
-5. **Logout**: `POST /api/v1/auth/logout` (client removes token)
-
-## Environment Configuration
-
-**Development**:
+### Session Headers
 ```
-BASE_URL: https://dev-api.quizapp.com/api/v1
-JWT_EXPIRY: 1 hour
-RATE_LIMIT: Relaxed
+Cookie: quiz_session=<session_token>
+Set-Cookie: quiz_session=<session_token>; HttpOnly; Secure; SameSite=Strict
 ```
 
-**Staging**:
+### CORS Headers
 ```
-BASE_URL: https://staging-api.quizapp.com/api/v1
-JWT_EXPIRY: 1 hour
-RATE_LIMIT: Production-like
-```
-
-**Production**:
-```
-BASE_URL: https://api.quizapp.com/api/v1
-JWT_EXPIRY: 1 hour
-RATE_LIMIT: Strict
+Access-Control-Allow-Origin: http://localhost:3000
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Allow-Credentials: true
 ```
 
----
+## Rate Limiting (Future Enhancement)
+- **Limit**: 100 requests per minute per session
+- **Headers**: `X-RateLimit-Limit`, `X-RateLimit-Remaining`
+- **Error**: 429 Too Many Requests
 
-*Document Version: 1.0*
-*Created: [Current Date]*
-*API Standard: OpenAPI 3.0*
-*Status: Complete*
+## API Versioning
+- **Current Version**: v1
+- **URL Pattern**: `/api/v1/...`
+- **Header**: `API-Version: 1.0`
+
+## Security Considerations
+
+### Input Validation
+- All inputs validated server-side
+- XSS prevention through input sanitization
+- SQL injection prevention through parameterized queries
+- File upload restrictions (not applicable in Phase 1)
+
+### Session Security
+- HttpOnly cookies prevent XSS access
+- Secure flag for HTTPS connections
+- SameSite attribute prevents CSRF
+- Session timeout on browser close
+
+### Data Protection
+- No sensitive data in API responses
+- Quiz answers validated server-side
+- Question bank protected from unauthorized access
+- User data isolated by session
+
+## Performance Considerations
+
+### Response Times
+- Authentication: < 200ms
+- Dashboard data: < 500ms
+- Question retrieval: < 200ms
+- Answer submission: < 300ms
+
+### Caching
+- Static topic data cached
+- Question randomization performed server-side
+- User statistics cached for dashboard performance
+
+### Database Optimization
+- Indexed queries for user data
+- Efficient random question selection
+- Connection pooling for concurrent users
