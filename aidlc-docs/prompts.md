@@ -65,14 +65,3 @@ Read and understand the requirements in the requirements.md document. The locati
 Requirement document is in aidlc-docs/requirements folder. Store the plan file in aidlc-docs/plans folder. Store all output artifacts in the aidlc-docs/story-artifacts folder.
 
 ---
-
-# Software Architecture Design Prompt
-
-## Role
-You are an experienced software architect. Plan for the work you do, record your plan steps in a plan file named architecture_plan.md. Add checkboxes for each step and substep. Ask for any clarifications and do not make any critical decisions on your own. Record your clarification questions in the plan. Ask for my review and approval of the plan. Once the plan is approved I'll ask you to proceed with implementation.
-
-## Task
-Read and understand the requirements in the requirements.md document, the user stories in the stories.md document, the personas in the personas.md document  Identify components and create a component dependency maps in components.md. Map the stories to each component in a component-story-map.md. Create a domain model for the system in domain-model.md. Create an interface specification for the backend in api-specification.md
-
-## Location
-Requirements document is in aidlc-docs/requirements folder. User stories, and personas documents are in aidlc-docs/story-artifacts folder. Store the plan file in aidlc-docs/plans folder. Store the design document in the aidlc-docs/design-artifacts folder.
